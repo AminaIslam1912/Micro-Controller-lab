@@ -2,7 +2,6 @@
 #include "CLOCK.h"
 #include "SYSINIT.h"
 #include "GPIO.h"
-#include "USART.h"
 #include <stdlib.h>
 
 #define NORTH_SOUTH_RED    (1 << 0)
@@ -23,15 +22,27 @@ typedef enum {
 } TrafficState;
 
 void traffic_init(void) {
-  
+   // RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOAEN;
 
-    // PB0–PB5 as output (traffic signals)
-   
+    // PB0ï¿½PB5 as output (traffic signals)
+   /* GPIOB->MODER &= ~(0x3FFF);
+    GPIOB->MODER |= (0x1555);
+    GPIOB->OTYPER &= ~(0x3F);
+    GPIOB->OSPEEDR |= (0x3FFF);
+    GPIOB->PUPDR &= ~(0x3FFF);
+
+    // PA6ï¿½PA7 as output (load indicator LEDs)
+    GPIOA->MODER &= ~(0xF << 12);
+    GPIOA->MODER |=  (0x5 << 12);   // Set PA6 and PA7 as output
+    GPIOA->OTYPER &= ~(NS_LOAD_LED | EW_LOAD_LED);
+    GPIOA->OSPEEDR |=  (0xF << 12);
+    GPIOA->PUPDR &= ~(0xF << 12);
+	*/
 	
 	  RCC->AHB1ENR |= (1 << 0); // GPIOA
     RCC->AHB1ENR |= (1 << 1); // GPIOB
 
-    /* PB0–PB5 as Output */
+    /******** PB0ï¿½PB5 as Output ********/
     // Set mode to output (01)
     GPIOB->MODER &= ~(0b11 << 0);  // Clear PB0
     GPIOB->MODER |=  (0b01 << 0);  // Set PB0 as output
@@ -196,12 +207,8 @@ void traffic_control(void) {
 
 int main(void) {
     initClock();
-   // USART_Init();
     systemInit();
     traffic_init();
-
-    // UART_SendString("STM32 Smart Traffic System Initialized\r\n");
-
     traffic_control();
     return 0;
 }
